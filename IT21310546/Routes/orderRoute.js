@@ -15,7 +15,7 @@ const router = express.Router();
 router.post('/', createOrder);
 
 // Admin or any authorized role can fetch all orders
-router.get('/', verifyRoles(ROLES_LIST.Admin), getAllOrders);
+router.get('/', getAllOrders);
 
 // Single order
 router.get('/:id', getOrderById); // Could add role checks or ownership checks

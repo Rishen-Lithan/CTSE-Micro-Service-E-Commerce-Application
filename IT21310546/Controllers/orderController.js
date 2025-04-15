@@ -1,5 +1,34 @@
 import Order from '../Models/orderModel.js';
 
+// API Call for get products
+const products = async () => {
+  try {
+    const response = await fetch('http://localhost:8000/s2/products', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const responseJson = await response.json();
+    if (!response.ok) {
+      console.log('Response Error : ', responseJson.message);
+      return;
+    }
+    console.log('Products List : ', responseJson);
+
+    const productIDs = responseJson.map((product) => {
+      return product._id
+    });
+
+    console.log('Product IDs : ', productIDs);
+    
+  } catch (error) {
+    console.log('Error getting products : ', error.message);    
+  }
+}
+
 // CREATE an order
 export const createOrder = async (req, res) => {
   try {
@@ -33,6 +62,7 @@ export const createOrder = async (req, res) => {
 
 // GET all orders (Admin only)
 export const getAllOrders = async (req, res) => {
+  await products();
   try {
     const orders = await Order.find();
     if (!orders || orders.length === 0) {

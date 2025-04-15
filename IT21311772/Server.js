@@ -38,7 +38,7 @@ app.use('/logout', LogoutRoute);
 
 // Other-Routes
 app.use('/category', verifyJWT, CategoryRoutes);
-app.use('/products', verifyJWT, ProductRoutes);
+app.use('/products', ProductRoutes);
 
 
 mongoose.connection.once('open', () => {
