@@ -6,7 +6,7 @@ const connectDB = async () => {
             useUnifiedTopology: true,
             useNewUrlParser: true
         })
-        console.log('Database connected');
+        console.log('Inventory Database connected');
         
     } catch (error) {
         console.error('Error connecting database : ', error);
