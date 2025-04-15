@@ -1,4 +1,5 @@
 import User from "../Models/userModel.js";
+import Vendor from "../Models/vendorModel.js";
 import bcrypt from 'bcrypt';
 import validator from "validator";
 import nodemailer from 'nodemailer';

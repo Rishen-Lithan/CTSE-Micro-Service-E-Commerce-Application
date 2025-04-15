@@ -35,12 +35,16 @@ app.use('/register', RegisterRoute);
 app.use('/login', LoginRoute);
 app.use('/logout', LogoutRoute);
 
-app.use(verifyJWT);
 
 // Other-Routes
-app.use('/category', CategoryRoutes);
-app.use('/products', ProductRoutes);
+app.use('/category', verifyJWT, CategoryRoutes);
+app.use('/products', verifyJWT, ProductRoutes);
+
 
 mongoose.connection.once('open', () => {
     app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
 })
+
+app.get('/', (req, res) => {
+    res.send('Welcome to the Product Service!');
+});
