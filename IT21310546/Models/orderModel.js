@@ -1,51 +1,40 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-const orderItemSchema = new Schema({
-  productId: {
-    type: Schema.Types.ObjectId,
-    required: true,
-    // ref: 'Products' if referencing your Product service's model
-  },
+const orderSchema = new Schema({
   quantity: {
     type: Number,
     required: true,
-    min: 1
+    min: 0,
   },
-  price: {
-    type: Number,
+  deliveryNote: {
+    type: String,
     required: true,
-    min: 0
-  }
+  },
+  address: {
+    type: String,
+    required: true,
+  },
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Products",
+  },
+  vendor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Vendor", // Reference to the Vendor model, if needed
+  },
+  orderStatus: {
+    type: Number, // 0 - Pending || 1 - Processing || 2 - Dispatch || 3 - Delivered || 4 - Cancel
+    required: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
 });
 
-const orderSchema = new Schema(
-  {
-    userId: {
-      // If referencing a separate Auth service or user model:
-      type: String, // or Schema.Types.ObjectId,
-      required: true
-    },
-    orderItems: [orderItemSchema],
-    totalPrice: {
-      type: Number,
-      required: true
-    },
-    shippingAddress: {
-      type: String,
-      default: ''
-    },
-    paymentMethod: {
-      type: String,
-      default: 'COD' // or 'Credit Card', 'Paypal', etc.
-    },
-    status: {
-      type: String,
-      enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
-      default: 'Pending'
-    }
-  },
-  { timestamps: true }
-);
-
-export default mongoose.model('Order', orderSchema);
+export default mongoose.model("Orders", orderSchema);

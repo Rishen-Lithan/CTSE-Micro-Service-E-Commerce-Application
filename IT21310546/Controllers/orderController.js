@@ -1,129 +1,241 @@
-import Order from '../Models/orderModel.js';
+import Orders from "../Models/orderModel.js";
+import validator from "validator";
+import nodemailer from "nodemailer";
+import fetch from "node-fetch";
 
-// API Call for get products
-const products = async () => {
+// Function to fetch product by ID from product microservice
+const fetchProductById = async (productId) => {
   try {
-    const response = await fetch('http://localhost:8000/s2/products', {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+    const response = await fetch(
+      `http://localhost:8000/s2/products/${productId}`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
       }
-    });
+    );
 
-    const responseJson = await response.json();
-    if (!response.ok) {
-      console.log('Response Error : ', responseJson.message);
-      return;
-    }
-    console.log('Products List : ', responseJson);
-
-    const productIDs = responseJson.map((product) => {
-      return product._id
-    });
-
-    console.log('Product IDs : ', productIDs);
-    
+    const product = await response.json();
+    if (!response.ok)
+      throw new Error(product.message || "Product fetch failed");
+    return product;
   } catch (error) {
-    console.log('Error getting products : ', error.message);    
+    throw new Error(`Error fetching product: ${error.message}`);
   }
-}
+};
 
-// CREATE an order
 export const createOrder = async (req, res) => {
+  const {
+    quantity,
+    deliveryNote,
+    address,
+    product: productId,
+    name,
+    email,
+  } = req.body;
+
+  if (!quantity) {
+    return res.status(400).json({ message: "Please select a quantity" });
+  } else if (!address) {
+    return res.status(400).json({ message: "Please enter the address" });
+  } else if (address.length > 250) {
+    return res
+      .status(400)
+      .json({ message: "Address should be less than 250 Characters" });
+  } else if (!name) {
+    return res.status(400).json({ message: "Please enter the name" });
+  } else if (!validator.isEmail(email)) {
+    return res
+      .status(400)
+      .json({ message: "Please enter a valid email address" });
+  }
+
   try {
-    const { orderItems, totalPrice, shippingAddress, paymentMethod } = req.body;
-    if (!orderItems || orderItems.length === 0) {
-      return res.status(400).json({ message: 'Order items required.' });
-    }
-    if (!totalPrice) {
-      return res.status(400).json({ message: 'Total price is required.' });
+    const product = await fetchProductById(productId);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
     }
 
-    // Usually, user info (userId or email) comes from req.user if validated
-    const userId = req.user || null;
+    if (product.remainingQuantity < quantity) {
+      return res.status(400).json({ message: "Insufficient product quantity" });
+    }
 
-    const newOrder = new Order({
-      userId,
-      orderItems,
-      totalPrice,
-      shippingAddress,
-      paymentMethod,
-      status: 'Pending',
+    if (!product.vendor || !product.vendor._id) {
+      return res.status(400).json({ message: "Product vendor is missing" });
+    }
+
+    // Save the order
+    const createdOrder = await Orders.create({
+      quantity,
+      deliveryNote,
+      address,
+      product: productId,
+      vendor: product.vendor._id,
+      orderStatus: 0,
+      name,
+      email,
     });
 
-    const savedOrder = await newOrder.save();
-    return res.status(201).json({ message: 'Order created', order: savedOrder });
+    const populatedOrder = await Orders.findById(createdOrder._id)
+      .populate("product")
+      .populate("vendor", "email vendorName contact address company");
+
+    // Send Email
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Notification from List Master",
+      text: `Hello ${name},\n\nYour order has been created successfully!\n\n\nBest Regards,\nList Master`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        return res
+          .status(500)
+          .json({ message: "Order created, but error sending email" });
+      }
+      console.log("Email sent:", info.response);
+      return res.status(201).json(populatedOrder);
+    });
   } catch (error) {
-    console.error('Error creating order:', error);
-    return res.status(500).json({ message: 'Internal Server Error' });
+    console.error("Error creating order:", error);
+    return res.status(500).json({ message: error.message });
   }
 };
 
-// GET all orders (Admin only)
 export const getAllOrders = async (req, res) => {
-  await products();
+  const orders = await Orders.find();
+  if (!orders) return res.status(404).json({ message: "No Orders Found" });
+  return res.status(200).json(orders);
+};
+
+export const getUserOrders = async (req, res) => {
+  const userOrders = await Orders.find({ email: req.body.email });
+  if (!userOrders)
+    return res.status(404).json({ message: "No Orders found with this User" });
+  return res.status(200).json(userOrders);
+};
+
+export const getUserOrderById = async (req, res) => {
+  if (!req?.body?.email || !req?.body?.id) {
+    return res
+      .status(400)
+      .json({ message: "User email and Order ID are required" });
+  }
+
   try {
-    const orders = await Order.find();
-    if (!orders || orders.length === 0) {
-      return res.status(404).json({ message: 'No orders found.' });
+    const userOrders = await Orders.find({ email: req.body.email });
+    if (!userOrders || userOrders.length === 0) {
+      return res.status(404).json({ message: "No orders found for this user" });
     }
-    return res.status(200).json(orders);
+
+    const getUserOrder = await Orders.findOne({
+      email: req.body.email,
+      _id: req.body.id,
+    });
+    if (!getUserOrder) {
+      return res.status(404).json({ message: "No order found with that ID" });
+    }
+
+    return res.status(200).json(getUserOrder);
   } catch (error) {
-    console.error('Error fetching orders:', error);
-    return res.status(500).json({ message: 'Internal Server Error' });
+    return res.status(500).json({ message: "Server error", error });
   }
 };
 
-// GET order by ID
-export const getOrderById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const order = await Order.findById(id);
-    if (!order) {
-      return res.status(404).json({ message: 'Order not found.' });
-    }
-    return res.status(200).json(order);
-  } catch (error) {
-    console.error('Error fetching order:', error);
-    return res.status(500).json({ message: 'Internal Server Error' });
+export const getVendorOrders = async (req, res) => {
+  if (!req?.body?.vendor_id) {
+    return res.status(400).json({ message: "Vendor ID is required" });
   }
+
+  const vendorOrders = await Orders.find({ vendor: req.body.vendor_id });
+  if (!vendorOrders)
+    return res.status(404).json({ message: "No orders for Vendor" });
+  return res.status(200).json(vendorOrders);
 };
 
-// UPDATE order status (Admin only, for example)
-export const updateOrderStatus = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
+export const getVendorOrderById = async (req, res) => {
+  if (!req?.body?.vendor_id || !req?.body?.id) {
+    return res
+      .status(400)
+      .json({ message: "Vendor ID & Order ID is required" });
+  }
 
-    const order = await Order.findById(id);
+  const getVendorOrder = await Orders.findOne({
+    _id: req.body.id,
+    vendor: req.body.vendor_id,
+  });
+  if (!getVendorOrder)
+    return res.status(404).json({ message: "Order not Found" });
+  return res.status(200).json(getVendorOrder);
+};
+
+export const changeOrderStatus = async (req, res) => {
+  if (!req?.params?.id) {
+    return res.status(400).json({ message: "Order ID required" });
+  }
+
+  if (!req?.body?.status) {
+    return res.status(400).json({ message: "Order status is required" });
+  }
+
+  try {
+    const order = await Orders.findById(req.params.id);
     if (!order) {
-      return res.status(404).json({ message: 'Order not found.' });
+      return res.status(404).json({ message: "No order found with that ID" });
     }
 
-    order.status = status || order.status;
+    order.orderStatus = req.body.status;
     const updatedOrder = await order.save();
 
-    return res.status(200).json({ message: 'Order status updated', order: updatedOrder });
+    return res.status(200).json({
+      message: "Order status updated successfully",
+      order: updatedOrder,
+    });
   } catch (error) {
-    console.error('Error updating order status:', error);
-    return res.status(500).json({ message: 'Internal Server Error' });
+    console.error("Error changing order status:", error);
+    return res.status(500).json({ message: "Server error", error });
   }
 };
 
-// DELETE order (Admin or authorized user, if you choose)
-export const deleteOrder = async (req, res) => {
+export const cancelOrder = async (req, res) => {
+  if (!req?.params?.id) {
+    return res.status(400).json({ message: "Order ID required" });
+  }
+
   try {
-    const { id } = req.params;
-    const order = await Order.findById(id);
+    const order = await Orders.findById(req.params.id);
     if (!order) {
-      return res.status(404).json({ message: 'Order not found.' });
+      return res.status(404).json({ message: "No order found with that ID" });
     }
 
-    await order.deleteOne();
-    return res.status(200).json({ message: 'Order deleted.' });
+    if (order.orderStatus === 1) {
+      return res.status(200).json({
+        message: "Your order is processing. Cannot cancel the order",
+      });
+    }
+
+    order.orderStatus = 4;
+    const updatedOrder = await order.save();
+
+    return res.status(200).json({
+      message: "Order cancelled successfully",
+      order: updatedOrder,
+    });
   } catch (error) {
-    console.error('Error deleting order:', error);
-    return res.status(500).json({ message: 'Internal Server Error' });
+    console.error("Error cancelling order:", error);
+    return res.status(500).json({ message: "Server error", error });
   }
 };
