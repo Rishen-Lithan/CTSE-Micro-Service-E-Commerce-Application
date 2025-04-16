@@ -16,9 +16,10 @@ const orderSchema = new Schema({
     required: true,
   },
   product: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Products",
-  },
+    _id: mongoose.Schema.Types.ObjectId,
+    name: String,
+    price: Number,
+  },  
   vendor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Vendor", // Reference to the Vendor model, if needed

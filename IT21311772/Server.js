@@ -20,6 +20,9 @@ import LogoutRoute from './Routes/logoutRoute.js'
 import CategoryRoutes from './Routes/categoryRoute.js';
 import ProductRoutes from './Routes/productRoutes.js';
 
+// Public Routes
+import productsAPI from './Routes/APIs/productAPI.js';
+
 const app = express();
 
 connectDB();
@@ -37,8 +40,9 @@ app.use('/logout', LogoutRoute);
 
 
 // Other-Routes
-app.use('/category', verifyJWT, CategoryRoutes);
-app.use('/products', ProductRoutes);
+app.use('/category', CategoryRoutes);
+app.use('/api', productsAPI);
+app.use('/products', verifyJWT, ProductRoutes);
 
 
 mongoose.connection.once('open', () => {

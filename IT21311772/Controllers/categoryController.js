@@ -1,11 +1,13 @@
 import Category from "../Models/categoryModel.js";
 
+// Controller Function to List All Categories
 export const getAllCategories = async (req, res) => {
     const categories = await Category.find();
     if(!categories) return res.status(404).json({ 'message': 'No Categories Found '});
     return res.status(200).json(categories);
 }
 
+// Controller Function to Create Category
 export const createCategory = async (req, res) => {
     if (!req?.body?.category) {
         return res.status(400).json({ 'message': 'Please Enter the Category '});
@@ -24,6 +26,7 @@ export const createCategory = async (req, res) => {
     }
 }
 
+// Controller Function to Change Category Status
 export const changeCategoryStatus = async (req, res) => {
     if (!req?.body?.id) {
         return res.status(400).json({ 'message': 'ID is required '});
@@ -51,6 +54,7 @@ export const changeCategoryStatus = async (req, res) => {
     }
 }
 
+// Controller Function to Delete the Category
 export const deleteCategory = async (req, res) => {
     if (!req?.body?.id) {
         return res.status(400).json({ 'message': 'ID is required' });

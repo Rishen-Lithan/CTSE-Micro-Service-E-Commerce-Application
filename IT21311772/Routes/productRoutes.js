@@ -1,7 +1,7 @@
 import express from 'express';
 import ROLES_LIST from '../Config/ROLES_LIST.js';
 import verifyRoles from '../Middlewares/verifyRoles.js';
-import { addProduct, getProducts, getProductById, deleteProduct, updateProduct } from '../Controllers/productController.js';
+import { addProduct, getProducts, getProductById, deleteProduct, updateProduct, manageQuantity, getProductsAPI } from '../Controllers/productController.js';
 
 const router = express.Router();
 
