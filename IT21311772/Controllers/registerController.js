@@ -1,5 +1,5 @@
 import User from "../Models/userModel.js";
-import Vendor from '../Models/vendorModel.js';
+import Vendor from "../Models/vendorModel.js";
 import bcrypt from 'bcrypt';
 import validator from "validator";
 import nodemailer from 'nodemailer';
@@ -44,9 +44,9 @@ export const handleNewUser = async (req, res) => {
 }
 
 export const handleNewVendor = async (req, res) => {
-    const { email, pwd, vendorName, address, contact, company } = req.body;
+    const { email, password, vendorName, address, contact, company } = req.body;
 
-    if (!email || !vendorName || !address || !contact || !company || !pwd) {
+    if (!email || !vendorName || !address || !contact || !company || !password) {
         return res.status(400).json({ 'message': 'Please Fill All the Required Fields ' });
     }
 
@@ -64,12 +64,12 @@ export const handleNewVendor = async (req, res) => {
     }
 
     const passwordLength = 8;
-    if (pwd.length < passwordLength) {
+    if (password.length < passwordLength) {
         return res.status(400).json({ 'message': `Password should have at least ${passwordLength} characters`});
     }
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(pwd)) {
+    if (!passwordRegex.test(password)) {
         return res.status(400).json({ 'message': 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'})
     }
 
@@ -79,7 +79,7 @@ export const handleNewVendor = async (req, res) => {
             return res.status(409).json({ message: 'An account with this email already exists' });
         }
 
-        const hashedPassword = await bcrypt.hash(pwd, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         const newVendor = new Vendor({
             email,
@@ -110,7 +110,7 @@ export const handleNewVendor = async (req, res) => {
             from: process.env.EMAIL_USER,
             to: email,
             subject: 'Welcome to List Master',
-            text: `Hello ${vendorName},\n\nYour vendor account has been created successfully!\n\nEmail: ${email}\nPassword: ${pwd}\n\nPlease change your password after your first login for security reasons.\n\nBest Regards,\nList Master`,
+            text: `Hello ${vendorName},\n\nYour vendor account has been created successfully!\n\nEmail: ${email}\nPassword: ${password}\n\nPlease change your password after your first login for security reasons.\n\nBest Regards,\nList Master`,
         }
 
         transporter.sendMail(mailOptions, (error, info) => {
