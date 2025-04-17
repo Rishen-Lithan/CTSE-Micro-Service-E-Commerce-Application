@@ -10,6 +10,7 @@ app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 
+// Middleware to log the request method and URL
 app.use("/s1", proxy("http://localhost:8001")); // Nuwandi
 app.use("/s2", proxy("http://localhost:8002")); // Rishen
 app.use("/s3", proxy("http://localhost:8003")); // Kushan
