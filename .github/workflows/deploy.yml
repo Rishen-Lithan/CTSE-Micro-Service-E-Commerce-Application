@@ -17,7 +17,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1 # Change to your region
+          aws-region: eu-north-1 # Change to your region
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -27,8 +27,8 @@ jobs:
         run: |
           for SERVICE in user-service order-service product-service api-gateway; do
             docker build -t $SERVICE ./\$SERVICE
-            docker tag $SERVICE:latest <your_account_id>.dkr.ecr.ap-south-1.amazonaws.com/$SERVICE:latest
-            docker push <your_account_id>.dkr.ecr.ap-south-1.amazonaws.com/$SERVICE:latest
+            docker tag $SERVICE:latest 124355653119.dkr.ecr.eu-north-1.amazonaws.com/$SERVICE:latest
+            docker push 124355653119.dkr.ecr.eu-north-1.amazonaws.com/$SERVICE:latest
           done
 
       - name: Set up kubectl
