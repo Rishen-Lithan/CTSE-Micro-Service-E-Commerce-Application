@@ -25,7 +25,7 @@ jobs:
 
       - name: Build, Tag, and Push Docker images
         run: |
-          for SERVICE in user-service order-service product-service api-gateway; do
+          for SERVICE in api-gateway-service it21310546-service it21311772-service it21467448-service it21894510-service; do
             docker build -t $SERVICE ./\$SERVICE
             docker tag $SERVICE:latest 124355653119.dkr.ecr.us-east-1.amazonaws.com/$SERVICE:latest
             docker push 124355653119.dkr.ecr.us-east-1.amazonaws.com/$SERVICE:latest
@@ -35,7 +35,7 @@ jobs:
         uses: azure/setup-kubectl@v3
 
       - name: Update kubeconfig
-        run: aws eks update-kubeconfig --region ap-south-1 --name your-cluster-name
+        run: aws eks update-kubeconfig --region us-east-1 --name nodejs-microservices
 
       - name: Apply Kubernetes manifests
         run: kubectl apply -f k8s/
