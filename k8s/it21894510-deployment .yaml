@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: it21894510-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: it21894510-service
+  template:
+    metadata:
+      labels:
+        app: it21894510-service
+    spec:
+      containers:
+        - name: it21894510-service
+          image: <your_account_id>.dkr.ecr.ap-south-1.amazonaws.com/it21894510-service:latest
+          ports:
+            - containerPort: 8004

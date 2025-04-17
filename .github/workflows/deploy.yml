@@ -1,0 +1,41 @@
+name: Deploy to EKS
+
+on:
+  push:
+    branches: [deployment]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1 # Change to your region
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, Tag, and Push Docker images
+        run: |
+          for SERVICE in user-service order-service product-service api-gateway; do
+            docker build -t $SERVICE ./\$SERVICE
+            docker tag $SERVICE:latest <your_account_id>.dkr.ecr.ap-south-1.amazonaws.com/$SERVICE:latest
+            docker push <your_account_id>.dkr.ecr.ap-south-1.amazonaws.com/$SERVICE:latest
+          done
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --region ap-south-1 --name your-cluster-name
+
+      - name: Apply Kubernetes manifests
+        run: kubectl apply -f k8s/

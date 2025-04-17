@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: it21311772-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: it21311772-service
+  template:
+    metadata:
+      labels:
+        app: it21311772-service
+    spec:
+      containers:
+        - name: it21311772-service
+          image: <your_account_id>.dkr.ecr.ap-south-1.amazonaws.com/it21311772-service:latest
+          ports:
+            - containerPort: 8002
