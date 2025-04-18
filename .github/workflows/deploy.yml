@@ -30,8 +30,8 @@ jobs:
           for SERVICE in IT21310546 IT21311772 IT21467448 IT21894510 Gateway; do
             IMAGE_NAME=$(echo "$SERVICE" | tr '[:upper:]' '[:lower:]')-service
             docker build -t $IMAGE_NAME ./$SERVICE
-            docker tag $IMAGE_NAME:latest 124355653119.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_NAME:latest
-            docker push 124355653119.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_NAME:latest
+            docker tag $IMAGE_NAME:latest 124355653119.dkr.ecr.eu-north-1.amazonaws.com/$IMAGE_NAME:latest
+            docker push 124355653119.dkr.ecr.eu-north-1.amazonaws.com/$IMAGE_NAME:latest
           done
 
       - name: Set up kubectl
