@@ -31,7 +31,7 @@ spec:
             - name: GOOGLE_CLIENT_SECRET
               value: "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"
             - name: PORT
-              value: 8001
+              value: "8001"
 
 ---
 apiVersion: v1
