@@ -17,3 +17,17 @@ spec:
           image: 124355653119.dkr.ecr.eu-north-1.amazonaws.com/it21467448-service:latest
           ports:
             - containerPort: 8003
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: it21467448-service
+spec:
+  selector:
+    app: it21467448-service
+  ports:
+    - protocol: TCP
+      port: 8003
+      targetPort: 8003
+  type: ClusterIP
