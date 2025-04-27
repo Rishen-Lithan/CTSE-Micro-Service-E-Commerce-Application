@@ -42,3 +42,6 @@ jobs:
 
       - name: Apply Kubernetes manifests
         run: kubectl apply -f k8s/
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --region eu-north-1 --name nodejs-microservices
