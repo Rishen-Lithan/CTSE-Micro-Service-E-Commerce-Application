@@ -38,7 +38,7 @@ jobs:
         uses: azure/setup-kubectl@v3
 
       - name: Update kubeconfig
-        run: aws eks update-kubeconfig --region us-east-1 --name nodejs-microservices
+        run: aws eks update-kubeconfig --region eu-north-1 --name nodejs-microservices
 
       - name: Apply Kubernetes manifests
         run: kubectl apply -f k8s/
