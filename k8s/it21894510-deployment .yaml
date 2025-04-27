@@ -30,6 +30,6 @@ spec:
     app: it21894510-service
   ports:
     - protocol: TCP
-      port: 80
+      port: 8004
       targetPort: 8004
-  type: ClusterIP
+  type: LoadBalancer
