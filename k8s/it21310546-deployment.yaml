@@ -19,6 +19,17 @@ spec:
             - name: http
               containerPort: 8001
               protocol: TCP
+          env:
+            - name: MONGO_URI
+              value: "mongodb+srv://user:user@it21310546.q2gpqft.mongodb.net/"
+            - name: ACCESS_TOKEN_SECRET
+              value: "168d658e2f17512e4a921db13d0fb2ff310ba3d5508b3699f02056b9fe4764a08ff2a2c584ffabe5846b5b3aa3e001f42e3217618146343411fe1fababe92319"
+            - name: REFRESH_TOKEN_SECRET
+              value: "45510ca673617e8ab44e7b11ae72733538873689c82df56090ea475b0879f389ac948ced43edf8c45db428feb51526fe7bd9ed9b43dfdb0ca3bde87f83216a66"
+            - name: GOOGLE_CLIENT_ID
+              value: "163092979167-99br0o79mbi8m5cetbuslhu5t1sier39.apps.googleusercontent.com"
+            - name: GOOGLE_CLIENT_SECRET
+              value: "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"
 
 ---
 apiVersion: v1
