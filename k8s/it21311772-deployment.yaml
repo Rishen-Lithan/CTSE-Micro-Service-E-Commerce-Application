@@ -16,7 +16,9 @@ spec:
         - name: it21311772-service
           image: 124355653119.dkr.ecr.eu-north-1.amazonaws.com/it21311772-service:latest
           ports:
-            - containerPort: 8002
+            - name: http
+              containerPort: 8002
+              protocol: TCP
 
 ---
 apiVersion: v1
@@ -28,6 +30,6 @@ spec:
     app: it21311772-service
   ports:
     - protocol: TCP
-      port: 8002
+      port: 80
       targetPort: 8002
   type: ClusterIP

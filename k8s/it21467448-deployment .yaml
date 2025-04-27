@@ -16,7 +16,9 @@ spec:
         - name: it21467448-service
           image: 124355653119.dkr.ecr.eu-north-1.amazonaws.com/it21467448-service:latest
           ports:
-            - containerPort: 8003
+            - name: http
+              containerPort: 8003
+              protocol: TCP
 
 ---
 apiVersion: v1
@@ -28,6 +30,6 @@ spec:
     app: it21467448-service
   ports:
     - protocol: TCP
-      port: 8003
+      port: 80
       targetPort: 8003
   type: ClusterIP
